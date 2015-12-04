@@ -1,0 +1,56 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+sourceCompatibility = 1.5
+version = '1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart',
+                   'Implementation-Version': version
+    }
+}
+
+mainClassName = "crawler.Main"
+
+run {
+args = ["/Users/rajatpawar/Documents/crawler/url_list","cf-templates-102ansummf34u-us-east-1","/Users/rajatpawar/Documents/aws/chaithra.properties"]
+}
+
+task runApp(type:JavaExec) {
+
+ext.appArg = ["/Users/rajatpawar/Documents/crawler/url_list","cf-templates-102ansummf34u-us-east-1","/Users/rajatpawar/Documents/aws/chaithra.properties"]
+
+	main='crawler.Main'
+
+args 'appArg'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+        compile 'commons-logging:commons-logging:1.1.1'
+        compile 'com.fasterxml.jackson.core:jackson-databind:2.6.2'
+        compile 'org.apache.httpcomponents:httpclient:4.5.1'
+        compile 'joda-time:joda-time:2.8.2'
+        compile 'com.amazonaws:aws-java-sdk:1.10.30'
+        compile 'org.apache.tika:tika-parsers:1.8'
+        compile 'commons-validator:commons-validator:1.4.0'
+        compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+        compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+        testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+test {
+    systemProperties 'property': 'value'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
