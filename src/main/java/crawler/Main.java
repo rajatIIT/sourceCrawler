@@ -69,8 +69,10 @@ public class Main {
         
         int directorySizeGoal = Integer.parseInt(myProperties.getProperty("url_count")) /100;
         System.out.println("We want a directory which has " + directorySizeGoal + " size. ");
+	for(int i=0;i<4;i++) {
         CrawlerThread thread = new CrawlerThread(args, directorySizeGoal);
         thread.start();
+	}
 
         /*
          * if(args[3].equals("true")){ domainStore = new DomainStore();
