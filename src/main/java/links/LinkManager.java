@@ -43,7 +43,7 @@ public class LinkManager {
     public LinkManager(AWSCredentials credentials){
         
         currentLinkStore = new LinkedList<URL>();
-        listSize = 100;
+        listSize = 1000;
         this.credentials = credentials;
         System.out.println("Using " + Main.getBucketName() + " as bucket for throwing crawled URL lists.");
         QueueDirectoryName = "Queued";
@@ -64,7 +64,7 @@ public class LinkManager {
         
         if(validator.isValid(link)){
         
-            if(currentLinkStore.size()==100){
+            if(currentLinkStore.size()==1000){
                 // throw the links to the store
                 throwLinksList();
                 currentLinkStore = new LinkedList<URL>();
@@ -110,7 +110,7 @@ public class LinkManager {
     public void throwLinksList() {
         // throw the list as a file to the bucket.
         System.out.println("=================================================================");
-        System.out.println("Done with 100 URLs.");
+        System.out.println("Done with 1000 URLs.");
         AmazonS3Client myClient = new AmazonS3Client(credentials);
         
         // convert the LinkedList<String> to a file-writable format. 

@@ -14,12 +14,12 @@ jar {
 mainClassName = "crawler.Main"
 
 run {
-args = ["/Users/rajatpawar/Documents/crawler/url_list","cf-templates-102ansummf34u-us-east-1","/Users/rajatpawar/Documents/aws/chaithra.properties"]
+args = ["abc","cf-templates-1mxuh0y0g7hlp-us-east-1","/home/ubuntu/cred.properties","true","bcd"]
 }
 
 task runApp(type:JavaExec) {
 
-ext.appArg = ["/Users/rajatpawar/Documents/crawler/url_list","cf-templates-102ansummf34u-us-east-1","/Users/rajatpawar/Documents/aws/chaithra.properties"]
+ext.appArg = ["abc","cf-templates-1mxuh0y0g7hlp-us-east-1","/home/ubuntu/cred.properties","true","bcd"]
 
 	main='crawler.Main'
 
