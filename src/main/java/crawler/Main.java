@@ -38,7 +38,7 @@ public class Main {
     private static String bucketName;
     private static Properties myProperties;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         // args[0] : File that contains URLs (if manual mode used [non S3])
         // args[1] : Name of Bucket. 
