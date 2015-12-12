@@ -15,6 +15,8 @@ import java.sql.Time;
 import java.util.Iterator;
 import java.util.List;
 
+import links.LinkManager;
+
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -23,16 +25,55 @@ import org.apache.tika.sax.Link;
 import org.apache.tika.sax.LinkContentHandler;
 import org.xml.sax.SAXException;
 
+import com.amazonaws.auth.AWSCredentials;
+
+/**
+ * A basic crawler that is supposed to crawl the URLs in a given list .
+ * 
+ * TODO : Create a crawler that crawls and methodically throws the links to a
+ * bucket.
+ * 
+ * @author rajatpawar
+ *
+ */
 public class ListCrawler implements Crawler {
 
     BucketWriter myWriter;
+    static boolean throwSourceToBucket, throwLinksToBucket;
 
     public ListCrawler(String bucketName, String credentialsFilePath) {
         myWriter = new BucketWriter(bucketName, credentialsFilePath);
+        setLinksOnlyCrawler();
     }
 
-    public void crawl(URLSource source, Path OutputDirectory) {
+    public void setSourceOnlyCrawler() {
+        throwSourceToBucket = true;
+        throwLinksToBucket = false;
+    }
 
+    public void setLinksOnlyCrawler() {
+        throwSourceToBucket = false;
+        throwLinksToBucket = true;
+    }
+
+    public void setSourceAndLinksCrawler() {
+        throwSourceToBucket = true;
+        throwLinksToBucket = true;
+    }
+
+    /**
+     * 
+     * Crawl the URL and throw the URL to the bucket. The basic task of the
+     * crawler.
+     * 
+     */
+    public void crawl(URLSource source, Path OutputDirectory) {
+        int crawlCount=0;
+        LinkManager linkManager;
+        linkManager = new LinkManager(Main.credentials);
+        
+
+        // source is a SET of URLs : while loop runs for each URL
         while (source.hasNext()) {
 
             URL nextURL = source.nextURL();
@@ -61,6 +102,7 @@ public class ListCrawler implements Crawler {
 
             StringBuilder sourceBuilder = new StringBuilder();
 
+            // CRAWL THE SOURCE
             try {
                 InputStream urlInputStream;
                 urlInputStream = nextURL.openConnection().getInputStream();
@@ -73,12 +115,22 @@ public class ListCrawler implements Crawler {
                 String urlSourceString = sourceBuilder.toString();
                 // System.out.println(urlSourceString);
 
-                InputStream pageSource = new ByteArrayInputStream(
-                        urlSourceString.getBytes(StandardCharsets.UTF_8));
+                if (throwSourceToBucket) {
+                    InputStream pageSource = new ByteArrayInputStream(
+                            urlSourceString.getBytes(StandardCharsets.UTF_8));
+                    myWriter.write(newFileName, pageSource);
+                }
+                
+                
+                
+                
 
-                if (DomainStore.storeDomain) {
+                if (throwLinksToBucket) {
                     // perform link analysis too!
+                    
+                    
                     System.out.println("Perform link analysis for " + nextURL.toString());
+                    System.out.println("Links Found: ");
                     AutoDetectParser myAutoDetectParser = new AutoDetectParser();
 
                     LinkContentHandler myLinkContentHandler = new LinkContentHandler();
@@ -94,20 +146,17 @@ public class ListCrawler implements Crawler {
                                 inputMetadata);
                         List<Link> linksList = myLinkContentHandler.getLinks();
                         Iterator<Link> listIterator = linksList.iterator();
-                 //       System.out.println("Found Hosts: ");
                         while (listIterator.hasNext()) {
-                            // String nextLink = listIterator.next().getText();
                             String nextLink = listIterator.next().getUri();
-                            
                             if (validator.isValid(nextLink)) {
-                            //    System.out.println("Allowed: " +  nextLink);
-                                URL nextLinkURL = new URL(nextLink);
-                                //System.out.print(" " + nextLinkURL.getHost() + " ");
-                   //             System.out.println("Host: " + nextLinkURL.getHost());
-                                Main.domainStore.addDomain(nextLinkURL.getHost());
+                                linkManager.handleLink(nextLink);
                             }
                         }
-
+                        
+                        crawlCount++;
+                        System.out.println("=====================================");
+                        System.out.println("Link extraction complete for " + crawlCount + " links from current list.");
+                        System.out.println("=====================================");
                     } catch (SAXException e) {
                         System.out.println("SAX Exception while handling links!");
                         e.printStackTrace();
@@ -118,8 +167,6 @@ public class ListCrawler implements Crawler {
 
                 }
 
-                // myWriter.write(newFileName,nextURL.openConnection().getInputStream());
-                myWriter.write(newFileName, pageSource);
 
             } catch (IOException e) {
                 e.printStackTrace();
