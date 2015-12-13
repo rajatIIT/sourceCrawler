@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,7 +44,8 @@ public class ListCrawler implements Crawler {
 
     public ListCrawler(String bucketName, String credentialsFilePath) {
         myWriter = new BucketWriter(bucketName, credentialsFilePath);
-        setLinksOnlyCrawler();
+        //setLinksOnlyCrawler();
+        setSourceOnlyCrawler();
     }
 
     public void setSourceOnlyCrawler() {
@@ -77,6 +79,8 @@ public class ListCrawler implements Crawler {
         while (source.hasNext()) {
 
             URL nextURL = source.nextURL();
+            
+            String nextURLHost = nextURL.getHost();
 
             System.out.println("Write URL to Bucket : " + nextURL.toString());
 
@@ -90,7 +94,8 @@ public class ListCrawler implements Crawler {
              * if ((new File(hostDirectory)).exists()) (new
              * File(hostDirectory)).mkdir();
              */
-            String newFileName = System.currentTimeMillis() + "-" + nextURL.hashCode();
+            
+            String newFileName = URLEncoder.encode(nextURL.toString()) +"-" +  System.currentTimeMillis() + "-" + nextURL.hashCode();
 
             // store the inputStream to a String.
 
@@ -118,7 +123,7 @@ public class ListCrawler implements Crawler {
                 if (throwSourceToBucket) {
                     InputStream pageSource = new ByteArrayInputStream(
                             urlSourceString.getBytes(StandardCharsets.UTF_8));
-                    myWriter.write(newFileName, pageSource);
+                    myWriter.write("Crawled" + "/" + nextURLHost + "/" + newFileName, pageSource);
                 }
                 
                 

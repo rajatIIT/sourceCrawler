@@ -1,5 +1,6 @@
 package crawler;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import com.amazonaws.auth.AWSCredentials;
@@ -29,6 +30,11 @@ public class BucketWriter {
         AWSCredentials pfcp = Main.credentials;
         AmazonS3Client myClient = new AmazonS3Client(pfcp);
         myClient.putObject(bucketName, key, inputStream, metadata);
+        try {
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
     }
 
